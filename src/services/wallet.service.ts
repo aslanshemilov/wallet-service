@@ -4,6 +4,7 @@ import { WalletAccount } from "../interfaces/account.interface";
 import {
   createAccountTransaction,
   getAccountTransactionsByReference,
+  getCurrentBalance,
   getTransactionsByCriteria,
 } from "../repository/accountTransaction.repository";
 import mongoose from "mongoose";
@@ -69,4 +70,9 @@ export const getAccountTransactionByCriteria = async (
   type: string
 ) => {
   return await getTransactionsByCriteria(amount, type);
+};
+
+//Compute current Balance for EOD, in case there are pending transactions e.tc
+export const computeCurrentBalance = async () => {
+  return await getCurrentBalance();
 };

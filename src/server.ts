@@ -17,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 const walletRouter = require("./routes/wallet.route");
 const masterAccountRouter = require("./routes/masterAccount.route");
 const walletAccountRouter = require("./routes/account.route");
+const endOfDayRouter = require("./routes/eod.route");
 
 const port = process.env.PORT || 3000;
 
@@ -39,6 +40,9 @@ app.use("/wallet", validateRateLimit, idempotencySafe, walletRouter);
 //Other BackOffice Related invokations
 app.use("/master", masterAccountRouter);
 app.use("/account", walletAccountRouter);
+
+//Job Scheduler Related invokations
+app.use("/job", endOfDayRouter);
 
 //Inject Logging and Error handlers Middlewares
 app.use(errorHandler);

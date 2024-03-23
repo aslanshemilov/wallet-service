@@ -27,3 +27,52 @@ export const getTransactionsByCriteria = async (
     throw new Error(`Error fetching transactions: ${error}`);
   }
 };
+
+export const getCurrentBalance = async (): Promise<number> => {
+  try {
+    const pipeline = [
+      {
+        $match: {
+          status: true, // Only consider transactions with status true
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          credit: {
+            $sum: {
+              $cond: {
+                if: { $eq: ["$type", "CREDIT"] },
+                then: "$amount",
+                else: 0,
+              },
+            },
+          },
+          debit: {
+            $sum: {
+              $cond: {
+                if: { $eq: ["$type", "DEBIT"] },
+                then: "$amount",
+                else: 0,
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          balance: { $subtract: ["$credit", "$debit"] },
+        },
+      },
+    ];
+
+    const result = await AccountTransactionModel.aggregate(pipeline);
+
+    // Extract balance from the result
+    const balance = result.length > 0 ? result[0].balance : 0;
+
+    return balance;
+  } catch (error) {
+    throw new Error(`Error computing current balance: ${error}`);
+  }
+};
