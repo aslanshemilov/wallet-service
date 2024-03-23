@@ -62,6 +62,10 @@ export const updateWalletAccountBalancesById = async (
   transactionType: TransactionType
 ) => {
   let wallet = await getWalletById(walletId);
+  console.log(
+    `Getting wallet by id in order to update balances: Wallet Id: ${walletId}`,
+    wallet
+  );
 
   const ZERO = mongoose.Types.Decimal128.fromString("0.0");
   if (wallet !== null && wallet !== undefined) {

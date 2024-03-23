@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express, NextFunction, Request, Response } from "express";
 import {
   WalletAccount,
   WalletAccountInput,
@@ -12,13 +12,19 @@ export const getAccountsHandler = (request: Request, response: Response) => {
 
 export const createAccountHandler = async (
   request: Request,
-  response: Response
+  response: Response,
+  next: NextFunction
 ) => {
   //Database calls call the service middleware
   const account: WalletAccountInput = request.body as WalletAccountInput;
-  const wallet = await addWalletAccount(account);
-  console.log("Wallet created response: " + JSON.stringify(wallet));
-  return response.send(wallet);
+  try {
+    const wallet = await addWalletAccount(account);
+    console.log("Wallet created response: " + JSON.stringify(wallet));
+    return response.send(wallet);
+  } catch (error) {
+    console.log("Error creating wallet");
+    next(error);
+  }
 };
 
 export const getAccountByAccountNumberHandler = (

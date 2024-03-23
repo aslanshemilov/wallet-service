@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express, NextFunction, Request, Response } from "express";
 import { MasterAccountInput } from "../interfaces/masterAccount.interface";
 import { addNewMasterAccount } from "../services/masterAccount.service";
 import { Error } from "mongoose";
@@ -13,14 +13,21 @@ export const getMasterAccountsHandler = (
 
 export const createMasterAccountHandler = async (
   request: Request,
-  response: Response
+  response: Response,
+  next: NextFunction
 ) => {
   console.log(request.body);
   const masterAccount: MasterAccountInput = request.body as MasterAccountInput;
   console.log("Received master account: " + masterAccount.firstName);
   //Database calls call the service middleware
-  const acc = await addNewMasterAccount(masterAccount);
-  return response.send(acc);
+  try {
+    const acc = await addNewMasterAccount(masterAccount);
+    return response.send(acc);
+  } catch (error) {
+    console.log("Error creating master account: " + error);
+    //Passing the exception to the next middleware in order i.e the error handler middleware
+    next(error);
+  }
 };
 
 export const getMasterAccountByReferenceHandler = (
