@@ -4,7 +4,8 @@ This is a basic wallet crud service
 
 ## Stack
 
-The service is build with node, express js with TypeScript and MongoDB as the database.
+- Node : 18
+- The service is build with node, express js with TypeScript and MongoDB as the database.
 
 ## Design Pattern (MVC - Middleware Pattern)
 
