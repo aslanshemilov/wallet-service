@@ -5,7 +5,7 @@ const MasterAccountSchema = new Schema<MasterAccountDocument>(
   {
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    email: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
     reference: { type: String, required: true, unique: true },
     idNumber: { type: String, required: true, unique: true },
   },
