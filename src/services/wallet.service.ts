@@ -1,7 +1,10 @@
 import { TransactionType } from "./../enums/transactionType.enum";
 import { AccountTransactionInput } from "./../interfaces/accountTransactions.interface";
 import { WalletAccount } from "../interfaces/account.interface";
-import { createAccountTransaction } from "../repository/accountTransaction.repository";
+import {
+  createAccountTransaction,
+  getAccountTransactionsByReference,
+} from "../repository/accountTransaction.repository";
 import mongoose from "mongoose";
 import { updateWalletAccountBalancesById } from "./accounts.service";
 
@@ -54,4 +57,8 @@ export const creditWallet = async (
   console.log("Credit the wallet account with funds");
   const credit = await createAccountTransaction(transaction);
   return credit;
+};
+
+export const getAccountTransactionByReference = async (reference: string) => {
+  return await getAccountTransactionsByReference(reference);
 };

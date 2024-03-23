@@ -3,12 +3,15 @@ import { AccountTransactionInput } from "../interfaces/accountTransactions.inter
 
 //Demonstrating a middleware concept where you could make validations for the rate limiting
 export const validateRateLimit = (
-  req: Request<AccountTransactionInput>,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  console.log("Account Reference:" + req.body.reference);
-  const uniqueReference = req.body.reference;
-  /** TODO Check database to see if this request is with the stipulated time i.e 1 min **/
+  /** TODO Check repository to see if this request of the same type and amount is with the stipulated time i.e 1 min **/
+  const transaction = req.body as AccountTransactionInput;
+  console.log("Account Reference:" + transaction.reference);
+  console.log("Amount: " + transaction.amount);
+  const amount = transaction.amount;
+
   next();
 };
