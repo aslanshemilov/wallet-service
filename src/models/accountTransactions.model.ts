@@ -11,7 +11,7 @@ const AccountTransactionSchema = new Schema<AccountTransactionDocument>(
   },
   {
     timestamps: true, // Automatically field createdAt and updatedAt
-    collection: "accounttransactions", // Create the collection with name 'users'
+    collection: "accountTransactions", // Create the collection with name 'users'
   }
 );
 
