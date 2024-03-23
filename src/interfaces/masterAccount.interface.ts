@@ -13,4 +13,5 @@ export type MasterAccountInput = {
   lastName: MasterAccountDocument["lastName"];
   email: MasterAccountDocument["email"];
   idNumber: MasterAccountDocument["idNumber"];
+  reference?: string;
 };

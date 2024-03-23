@@ -18,7 +18,5 @@ const WalletAccountSchema = new Schema<WalletAccount>(
   }
 );
 
-export const WalletAccountModel = mongoose.model<WalletAccount>(
-  "WalletAccount",
-  WalletAccountSchema
-);
+export const WalletAccountModel: Model<WalletAccount> =
+  mongoose.model<WalletAccount>("WalletAccount", WalletAccountSchema);

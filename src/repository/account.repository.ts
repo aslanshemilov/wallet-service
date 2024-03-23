@@ -1,20 +1,20 @@
-import { Model } from "mongoose";
-import { WalletAccount } from "../interfaces/account.interface";
+import { WalletAccountModel } from "../models/account.model";
 
-const model: Model<WalletAccount> = require("../models/account.model");
+export const getWalletAccounts = () => WalletAccountModel.find();
 
-export const getWalletAccounts = () => model.find();
+export const getWalletById = async (walletId: string) =>
+  await WalletAccountModel.findById(walletId);
 
 export const getWalletAccountsByReference = (reference: String) =>
-  model.findOne({ reference });
+  WalletAccountModel.findOne({ reference });
 
-export const createWalletAccount = (values: Record<string, any>) =>
-  new model(values).save().then((wallet: WalletAccount) => wallet);
+export const createWalletAccount = async (values: Record<string, any>) =>
+  await WalletAccountModel.create(values);
 
 export const deleteWalletAccountById = (id: string) =>
-  model.findByIdAndDelete(id);
+  WalletAccountModel.findByIdAndDelete(id);
 
-export const updateWalletAccountById = (
+export const updateWalletAccountById = async (
   id: string,
   values: Record<string, any>
-) => model.findByIdAndUpdate(id, values);
+) => await WalletAccountModel.findByIdAndUpdate(id, values);

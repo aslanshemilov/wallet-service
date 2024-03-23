@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { validateRateLimit } from "./middleware/rateLimit.middleware";
 import { idempotencySafe } from "./middleware/idempotencySafe.middleware";
 import mongoose from "mongoose";
+import { errorHandler } from "./middleware/errorHandler.middleware";
 
 dotenv.config();
 
@@ -38,5 +39,8 @@ app.use("/wallet", validateRateLimit, idempotencySafe, walletRouter);
 //Other BackOffice Related invokations
 app.use("/master", masterAccountRouter);
 app.use("/account", walletAccountRouter);
+
+//Inject Logging and Error handlers Middlewares
+app.use(errorHandler);
 
 app.listen(port, () => console.log(`Server listening on port: ${port}`));

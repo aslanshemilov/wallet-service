@@ -19,13 +19,8 @@ export const createMasterAccountHandler = async (
   const masterAccount: MasterAccountInput = request.body as MasterAccountInput;
   console.log("Received master account: " + masterAccount.firstName);
   //Database calls call the service middleware
-  try {
-    await addNewMasterAccount(masterAccount);
-    return response.sendStatus(200);
-  } catch (err) {
-    console.log(err);
-    return response.sendStatus(500);
-  }
+  const acc = await addNewMasterAccount(masterAccount);
+  return response.send(acc);
 };
 
 export const getMasterAccountByReferenceHandler = (

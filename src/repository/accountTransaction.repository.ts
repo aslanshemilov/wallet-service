@@ -1,12 +1,9 @@
-import { AccountTransaction } from "../interfaces/accountTransactions.interface";
-const model = require("../models/account.model");
+import { AccountTransactionModel } from "../models/accountTransactions.model";
 
-export const getAccountTransactions = () => model.find();
+export const getAccountTransactions = () => AccountTransactionModel.find();
 
-export const getAccountTransactionsByReference = (reference: String) =>
-  model.findOne({ reference });
+// export const getAccountTransactionsByReference = (reference: String) =>
+// AccountTransactionModel.findOne({ reference });
 
-export const createAccountTransaction = (values: Record<string, any>) =>
-  new model(values)
-    .save()
-    .then((transaction: AccountTransaction) => transaction);
+export const createAccountTransaction = async (values: Record<string, any>) =>
+  await AccountTransactionModel.create(values);
