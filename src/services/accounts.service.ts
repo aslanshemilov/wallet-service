@@ -13,7 +13,7 @@ import {
   generateRandomBase64Reference,
 } from "../utils/utls";
 import mongoose from "mongoose";
-import { processTransaction } from "./wallet.service";
+import { creditWallet, processTransaction } from "./wallet.service";
 
 export const addWalletAccount = async (account: WalletAccountInput) => {
   console.log("createWalletAccount", account);
@@ -44,7 +44,7 @@ export const addWalletAccount = async (account: WalletAccountInput) => {
   ) {
     console.log("Wallet Successfully Created Let's Credit the Wallet");
     const transaction_reference = generateRandomBase64Reference(12);
-    await processTransaction(
+    await creditWallet(
       account.currentBalance,
       wallet["_id"],
       TransactionType.CREDIT,

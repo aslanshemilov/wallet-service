@@ -5,6 +5,7 @@ import { createAccountTransaction } from "../repository/accountTransaction.repos
 import mongoose from "mongoose";
 import { updateWalletAccountBalancesById } from "./accounts.service";
 
+//This service is responsible for for generic Credit and Debit
 export const processTransaction = async (
   amount: mongoose.Types.Decimal128,
   walletAccount: WalletAccount["_id"],
@@ -34,4 +35,23 @@ export const processTransaction = async (
     return update;
   }
   return null;
+};
+
+//THis is for internal operations eg opening an account
+export const creditWallet = async (
+  amount: mongoose.Types.Decimal128,
+  walletAccount: WalletAccount["_id"],
+  transactionType: TransactionType,
+  transaction_reference: string
+) => {
+  const transaction: AccountTransactionInput = {
+    reference: transaction_reference,
+    type: transactionType,
+    amount: amount,
+    status: true,
+    walletAccount: walletAccount,
+  };
+  console.log("Credit the wallet account with funds");
+  const credit = await createAccountTransaction(transaction);
+  return credit;
 };
