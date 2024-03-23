@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { AccountTransactionInput } from "../interfaces/accountTransactions.interface";
 import { getAccountTransactionByReference } from "../services/wallet.service";
 
 //Demonstrating a middleware concept where you could make validations for the ideopotency

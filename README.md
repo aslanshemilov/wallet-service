@@ -39,15 +39,88 @@ This could be anything for a wallet service, sending money to a paybill, withdra
    To make a withdraw, im going to save them for processing, using the initiation-request ack pattern.
 
 - First a request is made with a unique reference.
-- Stored into some job somewhere for executation (in this demo will use a simple delay)
+- Stored into some job somewhere for executation (in this demo will i will use a save and reference approach)
 - Process and Debit the account
 - The response send back the client via some webhook or something.
 
+* Now for the purposes of this demo i have implemented a middleware that will check if the parsed transaction reference has already been proceed. The middlware approach will make our execution faster, since we are performing the logic almost at the **rest** layer.
+
+```ts
+import { NextFunction, Request, Response } from "express";
+import { getAccountTransactionByReference } from "../services/wallet.service";
+
+//Demonstrating a middleware concept where you could make validations for the ideopotency
+export const idempotencySafe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("Account Reference:" + req.body.reference);
+  console.log("Params", req);
+  const uniqueReference = req.body.reference;
+  /** TODO Check if the request has the same parameters as the already save requests if so return the same results or reject depending on the business requirement here **/
+  const checkTransaction = await getAccountTransactionByReference(
+    uniqueReference
+  );
+  console.log("Check Transaction Result:", checkTransaction);
+  if (checkTransaction) {
+    console.log(
+      "This transaction has already been proceesed",
+      checkTransaction
+    );
+    return res
+      .status(400)
+      .send({ error: "Invalid transaction -  Idempotency Check" });
+  }
+  next();
+};
+```
+
 2. **_RATE-LIMIT_**
 
-   - Rate limitting is one of the most important apsects to avoid exploitation form possible intruders.
-   - Best way to implement rate limitting will be on some sort of load balancer with your cluster.
-   - In this case i will implement this inside the withdraw method to check if we dont have the same request (amount, reference) from the same user with 1 minute.
+   - Rate limitting is one of the most important apsects to avoid exploitation from possible intruders.
+   - Best way to implement rate limitting will be on some sort of load balancer within your cluster.
+   - In this case i will implement this with a simple middleware pattern, that will check if we have a transaction of the same amount and type with 1 min. If so we need to immediately reject the transaction see sample below:
+
+```ts
+import { NextFunction, Request, Response } from "express";
+import { AccountTransactionInput } from "../interfaces/accountTransactions.interface";
+import { TransactionType } from "../enums/transactionType.enum";
+import { getAccountTransactionByCriteria } from "../services/wallet.service";
+
+//Demonstrating a middleware concept where you could make validations for the rate limiting
+export const validateRateLimit = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  /** TODO Check repository to see if this request of the same type and amount is with the stipulated time i.e 1 min **/
+  const transaction = req.body as AccountTransactionInput;
+  console.log("Account Reference:" + transaction.reference);
+  console.log("Amount: " + transaction.amount);
+  const amount = transaction.amount;
+  let transactionType: string;
+  if (req.path.includes("/withdraw")) {
+    transactionType = TransactionType.DEBIT;
+  } else if (req.path.includes("deposit")) {
+    transactionType = TransactionType.CREDIT;
+  } else {
+    return res.status(400).send({ error: "Invalid transaction type" });
+  }
+  const rateLimitedTransaction = await getAccountTransactionByCriteria(
+    transaction.amount,
+    transactionType.toString()
+  );
+  console.log(rateLimitedTransaction);
+  if (rateLimitedTransaction.length > 0) {
+    return res.status(400).send({
+      error:
+        "Invalid transaction - Too many transactions of the same type flag -  Rate Limit Check",
+    });
+  }
+  next();
+};
+```
 
 3. **_UNIQUE REFERENCES ON EACH TRANSACTION_**
-   - Here i also implemented a unique reference on each transaction. This we can make sure that at a internal DB level, we are not goin to have the transaction that are going to share the same origination reference.
+   - Here i also implemented a unique reference on each transaction. This we can make sure that at a internal DB level, we are not going to have transactions that are going to share the same origination reference.
