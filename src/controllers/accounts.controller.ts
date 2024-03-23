@@ -3,7 +3,10 @@ import {
   WalletAccount,
   WalletAccountInput,
 } from "../interfaces/account.interface";
-import { addWalletAccount } from "../services/accounts.service";
+import {
+  addWalletAccount,
+  getAccountByAccountNumber,
+} from "../services/accounts.service";
 
 export const getAccountsHandler = (request: Request, response: Response) => {
   //Database calls call the service middleware
@@ -27,13 +30,20 @@ export const createAccountHandler = async (
   }
 };
 
-export const getAccountByAccountNumberHandler = (
+export const getAccountByAccountNumberHandler = async (
   request: Request,
-  response: Response
+  response: Response,
+  next: NextFunction
 ) => {
   var accountNumber: string = request.params.accountNumber;
   //Database calls call the service middleware
-  return response.send(200);
+  try {
+    const wallet = await getAccountByAccountNumber(accountNumber);
+    return response.send(wallet);
+  } catch (error) {
+    console.log("Error getting wallet", error);
+    next(error);
+  }
 };
 
 export const deleteAccountByAccountNumberHandler = (

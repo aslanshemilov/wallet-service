@@ -5,8 +5,8 @@ export const getWalletAccounts = () => WalletAccountModel.find();
 export const getWalletById = async (walletId: string) =>
   await WalletAccountModel.findById(walletId);
 
-export const getWalletAccountsByReference = (reference: String) =>
-  WalletAccountModel.findOne({ reference });
+export const getWalletAccountsByAccountNumber = async (accountNumber: string) =>
+  await WalletAccountModel.findOne({ accountNumber });
 
 export const createWalletAccount = async (values: Record<string, any>) =>
   await WalletAccountModel.create(values);

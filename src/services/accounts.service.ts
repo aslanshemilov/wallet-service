@@ -5,6 +5,7 @@ import {
 } from "../interfaces/account.interface";
 import {
   createWalletAccount,
+  getWalletAccountsByAccountNumber,
   getWalletById,
   updateWalletAccountById,
 } from "../repository/account.repository";
@@ -122,4 +123,8 @@ export const updateWalletAccountBalancesById = async (
     return await updateWalletAccountById(walletId, wallet);
   }
   return null;
+};
+
+export const getAccountByAccountNumber = async (accountNumber: string) => {
+  return await getWalletAccountsByAccountNumber(accountNumber);
 };
