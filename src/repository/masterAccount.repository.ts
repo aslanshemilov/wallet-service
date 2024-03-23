@@ -1,18 +1,17 @@
-import { MasterAccount } from "../interfaces/masterAccount.interface";
-const model = require("../models/masterAccount.model");
+import { MasterAccountModel } from "../models/masterAccount.model";
 
-export const getMasterAccounts = () => model.find();
+export const getMasterAccounts = () => MasterAccountModel.find();
 
-export const getMasterAccountsByReference = (reference: String) =>
-  model.findOne({ reference });
+// export const getMasterAccountsByReference = async (reference: String) =>
+//   MasterAccountModel.findOne({ reference });
 
-export const createMasterAccount = (values: Record<string, any>) =>
-  new model(values).save().then((account: MasterAccount) => account);
+export const createMasterAccount = async (values: Record<string, any>) =>
+  MasterAccountModel.create(values);
 
 export const deleteMasterAccountById = (id: string) =>
-  model.findByIdAndDelete(id);
+  MasterAccountModel.findByIdAndDelete(id);
 
 export const updateMasterAccountById = (
   id: string,
   values: Record<string, any>
-) => model.findByIdAndUpdate(id, values);
+) => MasterAccountModel.findByIdAndUpdate(id, values);

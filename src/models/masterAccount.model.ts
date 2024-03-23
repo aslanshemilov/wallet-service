@@ -1,6 +1,7 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Model } from "mongoose";
+import { MasterAccountDocument } from "../interfaces/masterAccount.interface";
 
-const MasterAccountSchema = new mongoose.Schema({
+const MasterAccountSchema = new Schema<MasterAccountDocument>({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true },
@@ -8,7 +9,12 @@ const MasterAccountSchema = new mongoose.Schema({
   idNumber: { type: String, required: true },
 });
 
-export const MasterAccountModel = mongoose.model(
+export const MasterAccountModel: Model<MasterAccountDocument> = mongoose.model(
   "MasterAccount",
   MasterAccountSchema
 );
+
+// export const MasterAccountModel = mongoose.model<MasterAccount>(
+//   "MasterAccount",
+//   MasterAccountSchema
+// );

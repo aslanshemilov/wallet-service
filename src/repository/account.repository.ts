@@ -1,5 +1,7 @@
+import { Model } from "mongoose";
 import { WalletAccount } from "../interfaces/account.interface";
-const model = require("../models/account.model");
+
+const model: Model<WalletAccount> = require("../models/account.model");
 
 export const getWalletAccounts = () => model.find();
 
