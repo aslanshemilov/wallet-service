@@ -9,6 +9,7 @@ export const idempotencySafe = async (
   next: NextFunction
 ) => {
   console.log("Account Reference:" + req.body.reference);
+  console.log("Params", req);
   const uniqueReference = req.body.reference;
   /** TODO Check if the request has the same parameters as the already save requests if so return the same results or reject depending on the business requirement here **/
   const checkTransaction = await getAccountTransactionByReference(
@@ -22,7 +23,7 @@ export const idempotencySafe = async (
     );
     return res
       .status(400)
-      .send({ error: "Invalid transaction -  Ideompotency Check" });
+      .send({ error: "Invalid transaction -  Idempotency Check" });
   }
   next();
 };

@@ -4,6 +4,7 @@ import { WalletAccount } from "../interfaces/account.interface";
 import {
   createAccountTransaction,
   getAccountTransactionsByReference,
+  getTransactionsByCriteria,
 } from "../repository/accountTransaction.repository";
 import mongoose from "mongoose";
 import { updateWalletAccountBalancesById } from "./accounts.service";
@@ -61,4 +62,11 @@ export const creditWallet = async (
 
 export const getAccountTransactionByReference = async (reference: string) => {
   return await getAccountTransactionsByReference(reference);
+};
+
+export const getAccountTransactionByCriteria = async (
+  amount: mongoose.Types.Decimal128,
+  type: string
+) => {
+  return await getTransactionsByCriteria(amount, type);
 };

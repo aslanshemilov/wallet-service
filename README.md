@@ -35,7 +35,7 @@ Since im using one stack here, with limited time constraints im quite limited to
 
 This could be anything for a wallet service, sending money to a paybill, withdraw cash from some till etc, i will demostrate the high- level processing for this transaction.
 
-1. **_IDEOPOTENCY_** is one of the sucurity issues that payment systems have.
+1. **_IDEPOTENCY_** is one of the sucurity issues that payment systems have.
    To make a withdraw, im going to save them for processing, using the initiation-request ack pattern.
 
 - First a request is made with a unique reference.
@@ -44,6 +44,10 @@ This could be anything for a wallet service, sending money to a paybill, withdra
 - The response send back the client via some webhook or something.
 
 2. **_RATE-LIMIT_**
+
    - Rate limitting is one of the most important apsects to avoid exploitation form possible intruders.
    - Best way to implement rate limitting will be on some sort of load balancer with your cluster.
    - In this case i will implement this inside the withdraw method to check if we dont have the same request (amount, reference) from the same user with 1 minute.
+
+3. **_UNIQUE REFERENCES ON EACH TRANSACTION_**
+   - Here i also implemented a unique reference on each transaction. This we can make sure that at a internal DB level, we are not goin to have the transaction that are going to share the same origination reference.
