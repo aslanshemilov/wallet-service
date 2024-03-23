@@ -123,4 +123,61 @@ export const validateRateLimit = async (
 ```
 
 3. **_UNIQUE REFERENCES ON EACH TRANSACTION_**
+
    - Here i also implemented a unique reference on each transaction. This we can make sure that at a internal DB level, we are not going to have transactions that are going to share the same origination reference.
+
+4. **_RUNNING START AND END OF DAY JOBS_**
+   - Transaction Balances need to be handled with care to get full customer satification. One of the the disapointing aspect from the client and complience perspective is to have a system that can sometime in-accurately display running balannces.
+   - In this demo i have tackled this challenge by introducing two running balance fields (current balance and available balance) in my wallet account model.
+
+```ts
+import mongoose, { Model, Schema } from "mongoose";
+import { WalletAccount } from "../interfaces/account.interface";
+
+const WalletAccountSchema = new Schema<WalletAccount>(
+  {
+    accountNumber: { type: String, required: true, unique: true },
+    openingBalance: { type: mongoose.Types.Decimal128, required: true },
+    closingBalance: { type: mongoose.Types.Decimal128, required: true },
+    currentBalance: { type: mongoose.Types.Decimal128, required: true }, //as transactions are happening now balance
+    availableBalance: { type: mongoose.Types.Decimal128, required: true }, //delayed balance, probably will be updated by a EOD process or something
+    masterAccount: { type: Schema.Types.ObjectId, ref: "MasterAccount" },
+    active: { type: Boolean, required: true },
+    accountType: { type: String, required: true },
+  },
+  {
+    timestamps: true, // Automatically field createdAt and updatedAt
+    collection: "walletAccounts", // Create the collection with name 'users'
+  }
+);
+
+export const WalletAccountModel: Model<WalletAccount> =
+  mongoose.model<WalletAccount>("WalletAccount", WalletAccountSchema);
+```
+
+- This idea here is you can have the current balance showing the current balance of transactions as they happen in the system.
+- One catch of having current balance only is if thre are transactions that are later reversed, or failed are a transactional process, it might be a bit messy to alway update the field in real as these transactions happen maybe via webhook, queues etc.
+- This is where available balance comes in , available balance will be slighly delayed or behind the current balance since this field will be updated by internal processes like Start of Day and End Of Day Job.
+
+I have implement an end of day route which you can directly invoke from postman, this will update both the current and available balance at the end of the day.
+
+```ts
+import { NextFunction, Request, Response } from "express";
+import { computeEndOfDayBalance } from "../scheduler/eod.scheduler";
+
+export const computeBalanceEndOfDayHandler = (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  //Database calls call the service middleware
+  try {
+    //No await as this will run asynchronously at the background
+    computeEndOfDayBalance();
+    response.send({ success: "EOD Succesffull Started." });
+  } catch (err) {
+    console.log("Something went wrong", err);
+    next(err);
+  }
+};
+```

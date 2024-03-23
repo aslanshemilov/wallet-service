@@ -8,8 +8,9 @@ export const computeBalanceEndOfDayHandler = (
 ) => {
   //Database calls call the service middleware
   try {
+    //No await as this will run asynchronously at the background
     computeEndOfDayBalance();
-    response.send("EOD succesffull Started..");
+    response.send({ success: "EOD Succesffull Started." });
   } catch (err) {
     console.log("Something went wrong", err);
     next(err);
