@@ -35,6 +35,12 @@ mongoose
  * Here note im implementing a middleware pattern to validate the wallet requests
  * Note that the middleware will be executed in order
  */
+
+app.get("/", (req, res) => {
+  res.send(
+    "Hi there!, welcome to the Wallet Service. To get started use the postman collections shared on Guthub!!"
+  );
+});
 app.use("/wallet", validateRateLimit, idempotencySafe, walletRouter);
 
 //Other BackOffice Related invokations
