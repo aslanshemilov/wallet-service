@@ -189,7 +189,9 @@ export const computeBalanceEndOfDayHandler = (
 
 ## Testing
 
-- To test this service i have implemented 5 basic endpoints. You need to test them in order as i have wrote some postman scripts that will update the env variables for each request.
+BaseUrl : https://wallet-service-gyvo.onrender.com
+
+- To test this service i have implemented 5 basic endpoints. You need to test them in order as i have written some postman scripts that will update the env variables for each request.
 
 ### 1. Create Master Account - POST {{base_url}}/master
 
@@ -274,13 +276,13 @@ Now lets make our first deposit into our wallet.
 }
 ```
 
-- Make sure you insert a unique reference here for each and every request.
+- Make sure you pass a unique reference here for each and every request.
 - This pattern of making the client provide the random reference is mainly idempotency check.
 
 * 1.  For idopotency check - Here if this is a paymnt system being consumed by other servers you would typically have them submit their unique reference which you will then use to when you send the response back to their webhook. Also we need to check if the request are not intended as duplicates.
       **_However this pattern is highly opinionated as some would suggest generating these references from the server and have the client save them on their end to match responses._**
 
-2. Rate Limiting - The amount and transaction type which is going to be infered using the url is going to be used to rate limit check. We will reject requests on the same type and amount within a 1 min time interval.
+2. Rate Limiting - The amount and transaction type which is going to be infered using the url is going to be used for rate limit check. We will reject requests of the same type and amount within 1 min time interval.
 
 Successfully response, if there are no flags on idepotency and rate limit checks.
 
@@ -310,6 +312,22 @@ Notice here i deribalately returned the same amount since this for the most part
   "createdAt": "2024-03-24T06:14:31.892Z",
   "updatedAt": "2024-03-24T06:14:31.892Z",
   "__v": 0
+}
+```
+
+Sample Response for ideopotency:
+
+```json
+{
+  "error": "Invalid transaction -  Idempotency Check"
+}
+```
+
+Sample Response for rate limitting:
+
+```json
+{
+  "error": "Invalid transaction - Too many transactions of the same type flag -  Rate Limit Check"
 }
 ```
 
