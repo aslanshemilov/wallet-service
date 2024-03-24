@@ -18,22 +18,22 @@ The service is build with a MVC design pattern this allows the following
 
 ## Wallet Basic Architecture
 
-Here i have introduced 3 fundamental services of managing and interacting with our wallet service.
+Here i have introduced 3 fundamental services for managing and interacting with our wallet service.
 
-- 1. **_Master Account_** - The master service is responsible creating and managing the user. For the user to have a wallet with us we need some sort of service that we can quicly reference to get all associated transactions we have with that specific user.
+- 1. **_Master Account_** - The master service is responsible creating and managing the user. For the user to have a wallet with us we need some sort of service that we can quickly reference to get all associated transactions we have with that specific user.
 
 - 2. **_Wallet Account / Account_** - This is where all the magic happens. Here i have kept a one to many relashionship between the master account and the Wallet.
-     The idea here is to have our clients have the ability to open more than one wallet/account for different use cases eg Saving Account, Current Account, Credit Account, Credit Token Account e.t.c
+     The idea here is to have our clients have the ability to open more than one wallet/account for different use cases eg Savings Account, Current Account, Credit Account, Credit Token Account e.t.c
 
 - 3. **Account Transactions\*** - Then finally i have the Account Transactions service which has a one to many relationship with the wallet/account. Here is where all debit and credit happens i.e our withdrawal and deposits.
 
 # Financial Exploitations
 
-Since im using one stack here, with limited time constraints im quite limited to what i can show-case, but neverthless is is the basic approach im going to take.
+Since im using one stack here, with limited time constraints im quite limited to what i can show-case, but neverthless is the basic approach im going to take.
 
-## HANDLING WITHDRAWALS (CREDITS)
+## HANDLING WITHDRAWALS (CREDITS) & DEPOSITS (DEBITS)
 
-This could be anything for a wallet service, sending money to a paybill, withdraw cash from some till etc, i will demostrate the high- level processing for this transaction.
+This could be anything for a wallet service, sending money to a paybill, withdraw cash from some till etc, i will demostrate the high- level processing for this transaction, and deposit could be anthing, opening a new account with some balance, recieving funds etc
 
 1. **_IDEPOTENCY_** is one of the sucurity issues that payment systems have.
    To make a withdraw, im going to save them for processing, using the initiation-request ack pattern.
@@ -43,7 +43,7 @@ This could be anything for a wallet service, sending money to a paybill, withdra
 - Process and Debit the account
 - The response send back the client via some webhook or something.
 
-* Now for the purposes of this demo i have implemented a middleware that will check if the parsed transaction reference has already been proceed. The middlware approach will make our execution faster, since we are performing the logic almost at the **rest** layer.
+* Now for the purposes of this demo i have implemented a middleware that will check if the parsed transaction reference has already been processed. The middleware approach will make our execution faster, since we are performing the logic almost at the **rest** layer.
 
 ```ts
 import { NextFunction, Request, Response } from "express";
@@ -80,7 +80,7 @@ export const idempotencySafe = async (
 
    - Rate limitting is one of the most important apsects to avoid exploitation from possible intruders.
    - Best way to implement rate limitting will be on some sort of load balancer within your cluster.
-   - In this case i will implement this with a simple middleware pattern, that will check if we have a transaction of the same amount and type with 1 min. If so we need to immediately reject the transaction see sample below:
+   - In this case i will implement this with a simple middleware pattern, that will check if we have a transaction of the same amount and type within 1 min time interval. If so we need to immediately reject the transaction see sample below:
 
 ```ts
 import { NextFunction, Request, Response } from "express";
@@ -127,7 +127,7 @@ export const validateRateLimit = async (
    - Here i also implemented a unique reference on each transaction. This we can make sure that at a internal DB level, we are not going to have transactions that are going to share the same origination reference.
 
 4. **_RUNNING START AND END OF DAY JOBS_**
-   - Transaction Balances need to be handled with care to get full customer satification. One of the the disapointing aspect from the client and complience perspective is to have a system that can sometime in-accurately display running balannces.
+   - Transaction Balances need to be handled with care to get full customer satification. One of the the disapointing aspect from the client and complience perspective is to have a system that can sometimes in-accurately display running balannces.
    - In this demo i have tackled this challenge by introducing two running balance fields (current balance and available balance) in my wallet account model.
 
 ```ts
@@ -156,8 +156,8 @@ export const WalletAccountModel: Model<WalletAccount> =
 ```
 
 - This idea here is you can have the current balance showing the current balance of transactions as they happen in the system.
-- One catch of having current balance only is if thre are transactions that are later reversed, or failed are a transactional process, it might be a bit messy to alway update the field in real as these transactions happen maybe via webhook, queues etc.
-- This is where available balance comes in , available balance will be slighly delayed or behind the current balance since this field will be updated by internal processes like Start of Day and End Of Day Job.
+- One catch of having current balance only is if thre are transactions that are later reversed, or fail, delayed, it might be a bit messy to always update the field in real as these transactions happen maybe via webhook, queues etc.
+- This is where available balance comes in , available balance will be slighly delayed or behind the current balance since this field will be updated by internal processes like Start of Day and End Of Day Jobs.
 
 I have implement an end of day route which you can directly invoke from postman, this will update both the current and available balance at the end of the day.
 
