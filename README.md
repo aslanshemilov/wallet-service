@@ -5,7 +5,12 @@ This is a basic wallet crud service
 ## Stack
 
 - Node : 18
-- The service is build with node, express js with TypeScript and MongoDB as the database.
+- The service is build with node, express js with TypeScript and MongoDB as the database with Mongoose as the ORM.
+
+## Getting Started.
+
+- I have shared the postman collections in the resources folder inside the resources folder which is in the root folder of this project.
+- You need to make sure you import both files inside your postman.
 
 ## Design Pattern (MVC - Middleware Pattern)
 
@@ -180,4 +185,175 @@ export const computeBalanceEndOfDayHandler = (
     next(err);
   }
 };
+```
+
+## Testing
+
+- To test this service i have implemented 5 basic endpoints. You need to test them in order as i have wrote some postman scripts that will update the env variables for each request.
+
+### 1. Create Master Account - POST {{base_url}}/master
+
+```json
+{
+  "firstName": "Britney",
+  "lastName": "Lukas",
+  "email": "lkas@yahoo.com",
+  "idNumber": "SD4390549035"
+}
+```
+
+Response:
+Take note i will use the \_id in the next request
+
+```json
+{
+  "firstName": "Britney",
+  "lastName": "Lukas",
+  "email": "lkas@yahoo.com",
+  "reference": "xR73K0H6WQMGAA==",
+  "idNumber": "SD4390549035",
+  "_id": "65ffc3ee331f76786455d944",
+  "createdAt": "2024-03-24T06:10:54.377Z",
+  "updatedAt": "2024-03-24T06:10:54.377Z",
+  "__v": 0
+}
+```
+
+### 2. Create Account / Wallet - POST {{base_url}}/account
+
+Here im create a wallet / account and in this case in a Current Account. Notice im inject the master account id which has been saved in the postman env varialbe from the first request.
+
+```json
+{
+  "accountType": "CURRENT",
+  "openingBalance": "5000",
+  "masterAccount": "{{master_account_id}}",
+  "active": true
+}
+```
+
+Response:
+Notice the system automatically generated an account number, opening, available and current balanced have been updated.
+
+```json
+{
+  "accountNumber": "1234808162",
+  "openingBalance": {
+    "$numberDecimal": "5000"
+  },
+  "closingBalance": {
+    "$numberDecimal": "0.0"
+  },
+  "currentBalance": {
+    "$numberDecimal": "5000"
+  },
+  "availableBalance": {
+    "$numberDecimal": "5000"
+  },
+  "masterAccount": "65ffc3ee331f76786455d944",
+  "active": true,
+  "accountType": "CURRENT",
+  "_id": "65ffc4c7331f76786455d946",
+  "createdAt": "2024-03-24T06:14:31.892Z",
+  "updatedAt": "2024-03-24T06:14:31.892Z",
+  "__v": 0
+}
+```
+
+I will also save the \_id in the env variables to be used for later when we are now making our transactions.
+
+### 3. Deposit-Credit - POST {{base_url}}/wallet/deposit
+
+Now lets make our first deposit into our wallet.
+
+```json
+{
+  "reference": "RANDOM_UNIQUE_REFERENCE1234901",
+  "amount": 12.0,
+  "walletAccount": "{{wallet_account_id}}"
+}
+```
+
+- Make sure you insert a unique reference here for each and every request.
+- This pattern of making the client provide the random reference is mainly idempotency check.
+
+* 1.  For idopotency check - Here if this is a paymnt system being consumed by other servers you would typically have them submit their unique reference which you will then use to when you send the response back to their webhook. Also we need to check if the request are not intended as duplicates.
+      **_However this pattern is highly opinionated as some would suggest generating these references from the server and have the client save them on their end to match responses._**
+
+2. Rate Limiting - The amount and transaction type which is going to be infered using the url is going to be used to rate limit check. We will reject requests on the same type and amount within a 1 min time interval.
+
+Successfully response, if there are no flags on idepotency and rate limit checks.
+
+Response:
+
+Notice here i deribalately returned the same amount since this for the most part will be an asynchous request. Now check the balance to see if the request has been processed successfully.
+
+```json
+{
+  "_id": "65ffc4c7331f76786455d946",
+  "accountNumber": "1234808162",
+  "openingBalance": {
+    "$numberDecimal": "5000"
+  },
+  "closingBalance": {
+    "$numberDecimal": "0.0"
+  },
+  "currentBalance": {
+    "$numberDecimal": "5000"
+  },
+  "availableBalance": {
+    "$numberDecimal": "5000"
+  },
+  "masterAccount": "65ffc3ee331f76786455d944",
+  "active": true,
+  "accountType": "CURRENT",
+  "createdAt": "2024-03-24T06:14:31.892Z",
+  "updatedAt": "2024-03-24T06:14:31.892Z",
+  "__v": 0
+}
+```
+
+### 3.1 Check Balance after Credit - POST {{base_url}}/account/{{account_number}}
+
+Its a get request and here is the response
+
+```json
+{
+  "_id": "65ffc4c7331f76786455d946",
+  "accountNumber": "1234808162",
+  "openingBalance": {
+    "$numberDecimal": "5000"
+  },
+  "closingBalance": {
+    "$numberDecimal": "0.0"
+  },
+  "currentBalance": {
+    "$numberDecimal": "5012"
+  },
+  "availableBalance": {
+    "$numberDecimal": "5012"
+  },
+  "masterAccount": "65ffc3ee331f76786455d944",
+  "active": true,
+  "accountType": "CURRENT",
+  "createdAt": "2024-03-24T06:14:31.892Z",
+  "updatedAt": "2024-03-24T06:24:56.447Z",
+  "__v": 0
+}
+```
+
+### Section 4 and 4.1 demostrate the Debts. Debit amount and check balance
+
+### End Of Day Job - GET {{base_url}}/job/endOfDay
+
+This section demonstrates an idea of updating balances at the end of the day once all reconciliation is done. This approach will make sure that our current balance and available balance are aligned at the end of the day.
+
+Response:
+
+Simple success response as this will be run asynchronously at the background.
+
+```json
+{
+  "success": "EOD Succesffull Started."
+}
 ```
