@@ -1,0 +1,236 @@
+{
+	"info": {
+		"_postman_id": "01f36a48-2a65-4071-b38b-d086a61225a7",
+		"name": "WALLET SERVICE",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5168329"
+	},
+	"item": [
+		{
+			"name": "1. Create Master Account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the JSON response",
+							"var jsonResponse = pm.response.json();",
+							"",
+							"// Extract the access_token",
+							"var masterAccountId = jsonResponse._id;",
+							"",
+							"// Set the access_token as an environment variable",
+							"pm.environment.set(\"master_account_id\", masterAccountId);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\":\"Britney\",\n    \"lastName\":\"Lukas\",\n    \"email\":\"lkas@yahoo.com\",\n    \"idNumber\":\"SD4390549035\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/master",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"master"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Create Wallet Account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the JSON response",
+							"var jsonResponse = pm.response.json();",
+							"",
+							"// Extract the access_token",
+							"var walletAccountId = jsonResponse._id;",
+							"var accountNumber = jsonResponse.accountNumber",
+							"",
+							"// Set the access_token as an environment variable",
+							"pm.environment.set(\"wallet_account_id\", walletAccountId);",
+							"pm.environment.set(\"account_number\", accountNumber)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"accountType\":\"CURRENT\",\n    \"openingBalance\":\"5000\",\n    \"masterAccount\":\"{{master_account_id}}\",\n    \"active\":true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/account",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"account"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. Deposit- CREDIT",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"reference\":\"ENTER_RANDOM_UNIQUE_REFERENCE\",\n    \"amount\":12.00,\n    \"walletAccount\":\"{{wallet_account_id}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/wallet/deposit",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"wallet",
+						"deposit"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.1 Check Wallet after CREDIT",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"reference\":\"RANDOM_UNIQUE_REFERENCE1\",\n    \"amount\":10.00,\n    \"walletAccount\":\"{{wallet_account_id}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/account/{{account_number}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"account",
+						"{{account_number}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4.  Withdraw -DEBIT",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"reference\":\"ENTER_RANDOM_UNIQUE_REFERENCE2\",\n    \"amount\":10.00,\n    \"walletAccount\":\"{{wallet_account_id}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/wallet/withdraw",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"wallet",
+						"withdraw"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4.1  Check Wallet after DEBIT",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"reference\":\"SOME_RANDOM_REFERENCE_UNIQUE\",\n    \"amount\":10.00,\n    \"walletAccount\":\"{{wallet_account_id}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/account/{{account_number}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"account",
+						"{{account_number}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5. EndOfDay Job",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/job/endOfDay",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"job",
+						"endOfDay"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
