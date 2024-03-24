@@ -28,7 +28,9 @@ export const getTransactionsByCriteria = async (
   }
 };
 
-export const getCurrentBalance = async (): Promise<number> => {
+export const getCurrentBalancesByWalletAccount = async (): Promise<
+  { walletAccount: string; currentBalance: number }[]
+> => {
   try {
     const pipeline = [
       {
@@ -38,7 +40,7 @@ export const getCurrentBalance = async (): Promise<number> => {
       },
       {
         $group: {
-          _id: null,
+          _id: "$walletAccount",
           credit: {
             $sum: {
               $cond: {
@@ -61,18 +63,18 @@ export const getCurrentBalance = async (): Promise<number> => {
       },
       {
         $project: {
-          balance: { $subtract: ["$credit", "$debit"] },
+          walletAccount: "$_id",
+          currentBalance: { $subtract: ["$credit", "$debit"] },
         },
       },
     ];
 
     const result = await AccountTransactionModel.aggregate(pipeline);
 
-    // Extract balance from the result
-    const balance = result.length > 0 ? result[0].balance : 0;
-
-    return balance;
+    return result;
   } catch (error) {
-    throw new Error(`Error computing current balance: ${error}`);
+    throw new Error(
+      `Error computing current balances by wallet account: ${error}`
+    );
   }
 };
